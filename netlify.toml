@@ -1,0 +1,25 @@
+[build]
+  publish = "public"
+  command = "echo 'static build, nothing to compile'"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# Refresh cadence. Netlify's minimum is 1 minute; every 3 hours keeps the
+# dashboard close to live while using a small fraction of the API quotas.
+# To change: edit the cron below, redeploy. "@hourly" also works.
+[functions."refresh"]
+  schedule = "0 */3 * * *"
+
+# Instagram cannot schedule natively, so this decides what is due and hands off
+# to the background publisher. Every 15 minutes is the granularity of a
+# scheduled slot: a post set for 18:00 goes out between 18:00 and 18:15.
+[functions."publish-tick"]
+  schedule = "*/15 * * * *"
+
+# Post details and Instagram's daily follower split / follows history. The
+# refresh has no room for them inside its 30 seconds, so this hands off to
+# details-background (15 minutes). At :30, clear of the :00 refreshes.
+[functions."details-tick"]
+  schedule = "30 */6 * * *"

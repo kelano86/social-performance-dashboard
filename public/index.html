@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Social Performance Dashboard</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap"
+  rel="stylesheet" />
+<link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+
+<div class="rail rail-left"><span id="railSection">01 / OVERVIEW</span></div>
+<div class="rail rail-right"><span>SOCIAL PERFORMANCE DASHBOARD</span></div>
+
+<main class="wrap">
+
+  <header class="head">
+    <div class="slug">// SOCIAL PERFORMANCE DASHBOARD</div>
+    <h1 class="headline">CROSS PLATFORM <span class="accent">PERFORMANCE.</span></h1>
+    <div class="head-meta">
+      <span class="mono" id="updated">Loading</span>
+      <button id="refreshBtn" class="pill" type="button">Refresh now</button>
+      <div class="filters" id="rangeFilters" title="Applies to every time-based chart">
+        <button class="chip" data-range="14" type="button">14d</button>
+        <button class="chip is-active" data-range="30" type="button">30d</button>
+        <button class="chip" data-range="90" type="button">90d</button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs" role="tablist">
+    <button class="tab is-active" data-tab="overview" role="tab" type="button">Overview</button>
+    <button class="tab" data-tab="content" role="tab" type="button">Content</button>
+    <button class="tab" data-tab="audience" role="tab" type="button">Audience</button>
+    <button class="tab" data-tab="schedule" role="tab" type="button">Schedule</button>
+  </nav>
+
+  <div id="gate" class="gate" hidden>
+    <div class="slug">// LOCKED</div>
+    <p>This dashboard is passphrase protected.</p>
+    <form id="gateForm" autocomplete="off">
+      <input id="gateInput" type="password" placeholder="Passphrase" aria-label="Passphrase" />
+      <button class="pill" type="submit">Unlock</button>
+    </form>
+    <p class="gate-err mono" id="gateErr" hidden>Wrong passphrase.</p>
+  </div>
+
+  <div id="status" class="status">Loading data</div>
+
+  <!-- ============ OVERVIEW ============ -->
+  <section class="panel" data-panel="overview">
+    <div class="platform-bar">
+      <div class="filters" id="platformFilters" role="group" aria-label="Platform" title="Drives every card on this tab">
+        <button class="chip is-active" data-platform="combined" type="button" aria-pressed="true">Combined</button>
+        <button class="chip" data-platform="instagram" type="button" aria-pressed="false">Instagram</button>
+        <button class="chip" data-platform="youtube" type="button" aria-pressed="false">YouTube</button>
+      </div>
+    </div>
+
+    <div id="ovTiles" class="tiles"></div>
+
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="slug">// DAILY VIEWS</div>
+          <h2>Views per day</h2>
+        </div>
+        <div class="head-controls">
+          <div class="filters" id="modeFilters" role="group" aria-label="Lines">
+            <button class="chip is-active" data-mode="split" type="button" aria-pressed="true">By platform</button>
+            <button class="chip" data-mode="combined" type="button" aria-pressed="false">Combined</button>
+            <button class="chip" data-mode="followers" type="button" aria-pressed="false">Followers vs non-followers</button>
+          </div>
+          <div class="legend" id="ovLegend"></div>
+        </div>
+      </div>
+      <div id="ovDaily" class="chart"></div>
+      <p class="note" id="lagNote"></p>
+      <p class="note" id="viewsNote">
+        YouTube and Instagram count a view differently. Instagram counts plays including
+        replays with no minimum watch time. YouTube counts a view on its own threshold, and
+        changed how Shorts are counted in March 2025. Read the two lines side by side, not as
+        one comparable unit.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="slug">// VIEWS GAINED</div>
+          <h2>Top videos</h2>
+        </div>
+        <div class="filters" id="gainFilters" role="group" aria-label="Window" title="Window for this table only">
+          <button class="chip is-active" data-window="1" type="button" aria-pressed="true">24h</button>
+          <button class="chip" data-window="7" type="button" aria-pressed="false">7d</button>
+          <button class="chip" data-window="14" type="button" aria-pressed="false">14d</button>
+          <button class="chip" data-window="30" type="button" aria-pressed="false">30d</button>
+        </div>
+      </div>
+      <div id="ovGained" class="table-wrap gain-host"></div>
+      <p class="note" id="ovGainedNote"></p>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="slug">// FOLLOWER GROWTH</div>
+          <h2>Audience over time</h2>
+          <div class="mono growth-span" id="growthSpan"></div>
+        </div>
+        <div class="head-controls growth-controls">
+          <div class="filters" id="growthFilters" role="group" aria-label="Window" title="Window for this chart only">
+            <button class="chip" data-growth="7" type="button" aria-pressed="false">7d</button>
+            <button class="chip" data-growth="14" type="button" aria-pressed="false">14d</button>
+            <button class="chip is-active" data-growth="30" type="button" aria-pressed="true">30d</button>
+            <button class="chip" data-growth="custom" type="button" aria-pressed="false">Custom</button>
+          </div>
+          <div class="growth-custom" id="growthCustom" hidden>
+            <input type="date" id="growthFrom" aria-label="From" />
+            <span class="mono">to</span>
+            <input type="date" id="growthTo" aria-label="To" />
+          </div>
+        </div>
+      </div>
+      <div id="ovHistory" class="chart chart-sm"></div>
+      <p class="note" id="histNote"></p>
+    </div>
+  </section>
+
+  <!-- ============ CONTENT ============ -->
+  <section class="panel" data-panel="content" hidden>
+    <div class="card" id="hookCard">
+      <div class="card-head">
+        <div>
+          <div class="slug">// RETENTION BY POST</div>
+          <h2>Hook strength</h2>
+        </div>
+        <div class="head-controls">
+          <div class="filters" id="hookPlatform" role="group" aria-label="Platform" title="Follows the table filter; pick one here under All">
+            <button class="chip is-active" data-platform="instagram" type="button" aria-pressed="true">Instagram</button>
+            <button class="chip" data-platform="youtube" type="button" aria-pressed="false">YouTube</button>
+          </div>
+          <div class="filters" id="hookRange" role="group" aria-label="Posted in the last" title="Window for this chart only">
+            <button class="chip" data-hook-range="30" type="button" aria-pressed="false">30d</button>
+            <button class="chip is-active" data-hook-range="90" type="button" aria-pressed="true">90d</button>
+            <button class="chip" data-hook-range="all" type="button" aria-pressed="false">All</button>
+          </div>
+          <div class="filters" id="hookView" role="group" aria-label="View">
+            <button class="chip is-active" data-view="bars" type="button" aria-pressed="true">Bars</button>
+            <button class="chip" data-view="scatter" type="button" aria-pressed="false">Scatter</button>
+          </div>
+        </div>
+      </div>
+      <p class="hook-metric" id="hookMetric"></p>
+      <div id="hookChart" class="chart hook-chart"></div>
+      <p class="mono hook-meta" id="hookMeta"></p>
+      <p class="note" id="hookNote"></p>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="slug">// ALL CONTENT</div>
+          <h2 id="contentTitle">Everything, both platforms</h2>
+        </div>
+        <div class="filters" id="contentFilters" role="group" aria-label="Show">
+          <button class="chip is-active" data-filter="all" type="button" aria-pressed="true">All</button>
+          <button class="chip" data-filter="instagram" type="button" aria-pressed="false">Instagram</button>
+          <button class="chip" data-filter="youtube" type="button" aria-pressed="false">YouTube</button>
+          <button class="chip" data-filter="combined" type="button" aria-pressed="false">Combined by day</button>
+        </div>
+      </div>
+      <div id="allTable" class="table-wrap"></div>
+      <p class="note" id="contentNote"></p>
+    </div>
+  </section>
+
+  <!-- ============ AUDIENCE ============ -->
+  <section class="panel" data-panel="audience" hidden>
+    <div class="aud-grid">
+      <h3 class="aud-head aud-ig"><span class="legend-swatch" style="background:var(--s-instagram)"></span>Instagram</h3>
+      <div class="card aud-ig1">
+        <div class="slug">// GEOGRAPHY</div>
+        <h2>Followers by country</h2>
+        <p class="fixed-note mono">Current audience, not a time series</p>
+        <div id="igGeo" class="chart chart-sm"></div>
+      </div>
+      <div class="card aud-ig2">
+        <div class="slug">// AGE</div>
+        <h2>Follower age mix</h2>
+        <p class="fixed-note mono">Current audience, not a time series</p>
+        <div id="igAge" class="chart chart-sm"></div>
+      </div>
+      <div class="card aud-ig3">
+        <div class="slug">// GENDER</div>
+        <h2>Follower gender mix</h2>
+        <p class="fixed-note mono">Current audience, not a time series</p>
+        <div id="igGender" class="chart chart-sm"></div>
+      </div>
+
+      <h3 class="aud-head aud-yt"><span class="legend-swatch" style="background:var(--s-youtube)"></span>YouTube</h3>
+      <div class="card aud-yt1">
+        <div class="slug">// TRAFFIC SOURCES</div>
+        <h2>How viewers arrive</h2>
+        <p class="fixed-note mono" id="ytTrafficSpan">Header range</p>
+        <div id="ytTraffic" class="chart chart-sm"></div>
+      </div>
+      <div class="card aud-yt2">
+        <div class="slug">// GEOGRAPHY</div>
+        <h2>Views by country</h2>
+        <p class="fixed-note mono" id="ytGeoSpan">Header range</p>
+        <div id="ytGeo" class="chart chart-sm"></div>
+      </div>
+      <div class="card aud-yt3">
+        <div class="slug">// AGE</div>
+        <h2>Viewer age mix</h2>
+        <p class="fixed-note mono">Fixed 90 day window</p>
+        <div id="ytAge" class="chart chart-sm"></div>
+      </div>
+      <div class="card aud-yt4">
+        <div class="slug">// GENDER</div>
+        <h2>Viewer gender mix</h2>
+        <p class="fixed-note mono">Fixed 90 day window</p>
+        <div id="ytGender" class="chart chart-sm"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCHEDULE ============ -->
+  <section class="panel" data-panel="schedule" hidden>
+    <div class="card">
+      <div class="slug">// NEW RELEASE</div>
+      <h2>Schedule a reel</h2>
+
+      <div id="dropzone" class="dropzone">
+        <input type="file" id="fileInput" accept="video/mp4,video/quicktime" hidden />
+        <div class="dz-idle">
+          <strong>Drop an MP4 here</strong>
+          <span>or click to choose. Uploads in chunks, so large renders are fine.</span>
+        </div>
+        <div class="dz-progress" hidden>
+          <div class="dz-bar"><div class="dz-fill"></div></div>
+          <span class="dz-label mono"></span>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <label class="field field-wide">
+          <span class="field-label">Caption</span>
+          <textarea id="fCaption" rows="4" placeholder="Instagram caption, also used as the YouTube description"></textarea>
+        </label>
+        <label class="field">
+          <span class="field-label">YouTube title</span>
+          <input id="fTitle" type="text" maxlength="100" placeholder="Falls back to the caption" />
+        </label>
+        <label class="field">
+          <span class="field-label">Publish at (your local time)</span>
+          <input id="fWhen" type="datetime-local" />
+        </label>
+        <div class="field">
+          <span class="field-label">Platforms</span>
+          <div class="checks">
+            <label class="check"><input type="checkbox" id="fIg" checked /> <span>Instagram</span></label>
+            <label class="check"><input type="checkbox" id="fYt" checked /> <span>YouTube</span></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button id="scheduleBtn" class="pill" type="button" disabled>Schedule it</button>
+        <span class="mono" id="scheduleMsg"></span>
+      </div>
+
+      <p class="note" id="scheduleNote"></p>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="slug">// QUEUE</div>
+          <h2>Scheduled and sent</h2>
+        </div>
+        <button id="queueRefresh" class="chip" type="button">Reload</button>
+      </div>
+      <div id="queueTable" class="table-wrap"></div>
+      <p class="note">
+        Instagram has no native scheduling, so a cron here publishes due posts every 15
+        minutes, to both platforms: a slot set for 18:00 goes out between 18:00 and 18:15.
+        A failed platform is retried on the next runs, up to three attempts.
+      </p>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span class="mono" id="footSource">DATA VIA THE YOUTUBE AND INSTAGRAM APIS</span>
+    <span class="mono" id="footMeta"></span>
+  </footer>
+
+</main>
+
+<div id="tip" class="tip" hidden></div>
+
+<script src="/app.js"></script>
+<script src="/schedule.js"></script>
+</body>
+</html>
